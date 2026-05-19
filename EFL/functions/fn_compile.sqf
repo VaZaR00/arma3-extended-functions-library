@@ -117,14 +117,14 @@ EFL_fnc_remoteExec = {
 
     if (!isMultiplayer || {(_targets in [PLAYER_, false, clientOwner])}) exitWith {
         if (_func isEqualTo "call") exitWith {
-            (_args#0) call (_args#1)
+            isNil{(_args#0) call (_args#1)}
         };
         if (_func isEqualTo "spawn") exitWith {
             (_args#0) spawn (_args#1)
         };
         private _func = missionNamespace getVariable [_func, {format["EFL_fnc_remoteExec ERROR: func '%1' not found!", _func] WARN}];
         if (_call) then {
-            _args call _func
+            isNil{_args call _func}
         } else {
             _args spawn _func
         };
@@ -133,7 +133,7 @@ EFL_fnc_remoteExec = {
 	if !(_remoteSelfCall) then {
 		private _selfArgs = +_args;
 		if (_isCall) then {
-			_selfArgs call _func;
+			isNil{_selfArgs call _func};
 		} else {
 			_selfArgs spawn _func;
 		};
