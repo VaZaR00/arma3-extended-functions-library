@@ -5,13 +5,13 @@
 EFL_fnc_pushBackNet = {
     params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true], ["_target", true], ["_jip", true]];
 
-    VALID_NAMESPACE
-    
-    if (isNil '_element') exitWith {};
+    VALID_ARGS(_element)
 
 	[_this, {
     	params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true]];
 
+        VALID_NAMESPACE
+    
 		private _array = _namespace getVariable [_varname, []];
 		if (_unique) then {
 			_array pushBackUnique _element;
@@ -26,13 +26,15 @@ EFL_fnc_pushBackNet = {
 EFL_fnc_hashSetNet = {
     params["_namespace", "_varname", "_key", "_value", ["_callEH", true], ["_target", true], ["_jip", true]];
 
-    VALID_NAMESPACE
+    VALID_ARGS(_key)
 
     if (isNil '_key') exitWith {};
 
 	[_this, {
     	params["_namespace", "_varname", "_key", "_value", ["_callEH", true]];
 
+        VALID_NAMESPACE
+    
 		private _hash = _namespace getVariable [_varname, createHashMap];
 		_hash set [_key, _NIL(_value)];
 		_namespace setVariable [_varname, _hash];
@@ -43,16 +45,17 @@ EFL_fnc_hashSetNet = {
 EFL_fnc_removeFromArrayNet = {
     params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true], ["_target", true], ["_jip", true]];
 
-    VALID_NAMESPACE
-    
-    if (isNil '_elements') exitWith {};
-    if !(_elements isEqualType []) then {
-        _elements = [_elements];
-    };
+    VALID_ARGS(_elements)
 
 	[_this, {
     	params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true]];
 
+        VALID_NAMESPACE
+            
+        if !(_elements isEqualType []) then {
+            _elements = [_elements];
+        };
+    
 		private _array = _namespace getVariable [_varname, []];
 		if (_pop) then {
             // delete last element
@@ -72,13 +75,13 @@ EFL_fnc_removeFromArrayNet = {
 EFL_fnc_deleteAtNet = {
     params["_namespace", "_varname", "_key", ["_callEH", true], ["_target", true], ["_jip", true]];
 
-    VALID_NAMESPACE
+    VALID_ARGS(_key)
     
-    if (isNil '_key') exitWith {};
-
 	[_this, {
     	params["_namespace", "_varname", "_key", ["_callEH", true]];
 
+        VALID_NAMESPACE
+    
 		private _map = _namespace getVariable [_varname, []];
 		_map deleteAt _key;
 		_namespace setVariable [_varname, _map];
