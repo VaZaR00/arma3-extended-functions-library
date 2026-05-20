@@ -90,12 +90,13 @@ EFL_fnc_deleteAtNet = {
 };
 
 EFL_fnc_remoteExec = {
-    params[["_args", []], ["_func", "call"], ["_targets", 0], ["_jip", true], ["_call", false, [false]], ["_remoteSelfCall", true]];
+    params[["_args", []], ["_func", "call"], ["_targets", 0], ["_jip", false], ["_call", false, [false]], ["_remoteSelfCall", true]];
 
     if (_func isEqualType {}) then {
         _args = [_args, _func];
         _func = if (_call) then {"call"} else {"spawn"};
     };
+    private _isCallCommand = _func in ["call", "spawn"];
     if !(_func isEqualType "") exitWith {format["EFL_fnc_remoteExec ERROR: func not str or code. Func type: %1. Func value: %2", typeName _func, _func] WARN};
 
     if (_targets isEqualType true) then {
@@ -140,8 +141,22 @@ EFL_fnc_remoteExec = {
 		} else {
 			_selfArgs spawn _func;
 		};
-		_args = [_args, _func, clientOwner];
-		_func = {if ((_this#2) isEqualTo clientOwner) exitWith {}; (_this#0) call (_this#1)};
+        if !(_isCallCommand) then {
+            _args = [_args, _func];
+        };
+		private _funcRmt = {
+            params["_args", "_clientCaller", ["_isCallCommand", false]];
+            if (_clientCaller isEqualTo clientOwner) exitWith {}; 
+            _args params [["_args", []], ["_func", {}]];
+            if (!_isCallCommand && {IS_STR(_func)}) then {
+                _func = missionNamespace getVariable [_func, {format["EFL_fnc_remoteExec ERROR: func '%1' not found!", _func] WARN}];
+            };
+            if !(_func isEqualType {}) exitWith {
+                format["EFL_fnc_remoteExec ERROR: func is not code! Func: '%1'", _func] WARN
+            };
+            _args call _func
+        };
+		_args = [[_args, clientOwner, _isCallCommand], _funcRmt];
 	};
     if (_isCall) then {
         _args remoteExecCall [_func, _targets, _jip];
@@ -171,10 +186,25 @@ EFL_fnc_callVariableEH = {
 
     _args call (missionNamespace getVariable [_ehFuncName, {}]);
 };
+
+EFL_fnc_publicVariable = {
+    params["_namespace", "_varname", ["_callEH", true], ["_target", true], ["_jip", nil]];
+
+    VALID_VARNAME
+
+	[[_namespace, _varname, (missionNamespace getVariable _varname), _callEH], {
+        params["_namespace", "_varname", "_value", ["_callEH", true]];
+
+        VALID_NAMESPACE
+		
+        _namespace setVariable [_varname, _NIL(_value)];
+        [_varname, _callEH] call EFL_fnc_callVariableEH;
+	}, _target, if (isNil "_jip") then {_target isEqualTo true} else {false}, true, false] call EFL_fnc_remoteExec;
+};
 //-----------------------------------
 
 
-//-------------- GLOBALS ---------------
+//-------------- WRAPPERS ---------------
 EFL_fnc_pushBackGlobal = {
     params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true]];
 
@@ -197,5 +227,13 @@ EFL_fnc_deleteAtGlobal = {
     params["_namespace", "_varname", "_key", ["_callEH", true]];
 
     [_namespace, _varname, _NIL(_key), _callEH, true, true] call EFL_fnc_deleteAtNet;
+};
+
+EFL_fnc_publicVariableServer = {
+    params["_namespace", "_varname", ["_callEH", true]];
+
+    VALID_VARNAME
+
+    [_NIL(_namespace), _varname, _callEH, 2, false] call EFL_fnc_publicVariable;
 };
 //-----------------------------------
