@@ -20,6 +20,7 @@
 #define QFUNC(f) (MGVAR [STR(PREF_FNC) + f, {}])
 #define PREF_QVAR(s) (PREF_VAR + s)
 #define RC_PREF(s) (PREF_CLAS + s)
+#define VAR_PREFIX (if (isNil "_ADDON_PREFX") then {SPREFX} else {_ADDON_PREFX})
 
 
 #define FN_FUNC_CFG(name) class name {file = FUNC_PATH(TRIPLE(fn_,name,.sqf));DO_FUNC_RECOMPILE};

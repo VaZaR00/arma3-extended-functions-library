@@ -115,7 +115,7 @@ EFL_fnc_remoteExec = {
                 _id = str _id;
             };
         };
-        _jip = "EFL_jip_remote_exec_id_" + _id;
+        _jip = VAR_PREFIX + "_jip_remote_exec_id_" + _id;
     };
 
     if (!isMultiplayer || {(_targets in [PLAYER_, false, clientOwner])}) exitWith {
