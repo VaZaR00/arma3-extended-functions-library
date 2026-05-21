@@ -204,13 +204,11 @@ EFL_fnc_callVariableEH = {
 };
 
 EFL_fnc_publicVariable = {
-    ["PBV 1", _this] RLOG
     private _namespace = _this param [0, nil];
     if (!(isNil "_namespace") && {_namespace isEqualType ""}) then {
         _this = [missionNamespace] + (if (_this isEqualType []) then {_this} else {[_this]});
     };
 
-    ["PBV 2", _this] RLOG
     params["_namespace", "_varname", ["_callEH", true], ["_target", true], ["_jip", nil]];
 
     VALID_VARNAME
@@ -254,8 +252,6 @@ EFL_fnc_deleteAtGlobal = {
 
 EFL_fnc_publicVariableServer = {
     params["_namespace", "_varname", ["_callEH", true]];
-
-    VALID_VARNAME
 
     [_NIL(_namespace), _NIL(_varname), _callEH, 2, false] call EFL_fnc_publicVariable;
 };
