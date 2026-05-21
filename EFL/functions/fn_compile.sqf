@@ -92,12 +92,16 @@ EFL_fnc_deleteAtNet = {
 EFL_fnc_remoteExec = {
     params[["_args", []], ["_func", "call"], ["_targets", 0], ["_jip", false], ["_call", false, [false]], ["_remoteSelfCall", true]];
 
+	private _isCall = _call isEqualTo true;
+
     if (_func isEqualType {}) then {
         _args = [_args, _func];
-        _func = if (_call) then {"call"} else {"spawn"};
+        _func = if (_isCall) then {"call"} else {"spawn"};
     };
-    private _isCallCommand = _func in ["call", "spawn"];
+
     if !(_func isEqualType "") exitWith {format["EFL_fnc_remoteExec ERROR: func not str or code. Func type: %1. Func value: %2", typeName _func, _func] WARN};
+
+    private _isCallCommand = _func in ["call", "spawn"];
 
     if (_targets isEqualType true) then {
         if (_targets isEqualTo true) then {
@@ -119,50 +123,62 @@ EFL_fnc_remoteExec = {
         _jip = VAR_PREFIX + "_jip_remote_exec_id_" + _id;
     };
 
-    if (!isMultiplayer || {(_targets in [PLAYER_, false, clientOwner])}) exitWith {
-        if (_func isEqualTo "call") exitWith {
-            isNil{(_args#0) call (_args#1)}
-        };
-        if (_func isEqualTo "spawn") exitWith {
-            (_args#0) spawn (_args#1)
-        };
-        private _func = missionNamespace getVariable [_func, {format["EFL_fnc_remoteExec ERROR: func '%1' not found!", _func] WARN}];
-        if (_call) then {
-            isNil{_args call _func}
-        } else {
-            _args spawn _func
-        };
-    };
-	private _isCall = _call isEqualTo true;
+    #define RMT_RMT_EXEC { \
+        if (_isCall) then { \
+            _args remoteExecCall [_func, _targets, _jip]; \
+        } else { \
+            _args remoteExec [_func, _targets, _jip]; \
+        }; \
+    }; \
+
+    #define RMT_TYPE_CALL { \
+        if (_isCall) exitWith { \
+            isNil{_args call _this} \
+        }; \
+        if (_func isEqualTo "spawn") exitWith { \
+            _args spawn _this \
+        }; \
+        _args call _this; \
+    }; \
+
+    #define RMT_LOCAL_CALL { \
+        private _args = _this; \
+        if (_isCallCommand) exitWith { \
+            if !(_args isEqualType []) then { \
+                _args = [_args]; \
+            }; \
+            if (count _args == 1) then { \
+                _args = [[], _args#0]; \
+            }; \
+            _args params [["_args", []], ["_argFunc", {}]]; \
+            _argFunc call RMT_TYPE_CALL; \
+        }; \
+        private _function = missionNamespace getVariable _func; \
+        if (isNil "_function") exitWith { \
+            format["EFL_fnc_remoteExec ERROR: func '%1' not found!", _func] WARN; \
+            call RMT_RMT_EXEC; \
+        }; \
+        _function call RMT_TYPE_CALL; \
+    }; \
+
+    if (!isMultiplayer || {(_targets in [PLAYER_, false, clientOwner])}) exitWith {_args call RMT_LOCAL_CALL};
+
 	if !(_remoteSelfCall) then {
-		private _selfArgs = +_args;
-		if (_isCall) then {
-			isNil{_selfArgs call _func};
-		} else {
-			_selfArgs spawn _func;
-		};
+		private _selfArgs = if ((_args isEqualType []) || {(_args isEqualType createHashMap)}) then {+_args} else {_args};
+		_selfArgs call RMT_LOCAL_CALL;
         if !(_isCallCommand) then {
             _args = [_args, _func];
         };
 		private _funcRmt = {
             params["_args", "_clientCaller", ["_isCallCommand", false]];
             if (_clientCaller isEqualTo clientOwner) exitWith {}; 
-            _args params [["_args", []], ["_func", {}]];
-            if (!_isCallCommand && {IS_STR(_func)}) then {
-                _func = missionNamespace getVariable [_func, {format["EFL_fnc_remoteExec ERROR: func '%1' not found!", _func] WARN}];
-            };
-            if !(_func isEqualType {}) exitWith {
-                format["EFL_fnc_remoteExec ERROR: func is not code! Func: '%1'", _func] WARN
-            };
-            _args call _func
+            _args call RMT_LOCAL_CALL;
         };
 		_args = [[_args, clientOwner, _isCallCommand], _funcRmt];
+        _func = if (_isCall) then {"call"} else {"spawn"};
 	};
-    if (_isCall) then {
-        _args remoteExecCall [_func, _targets, _jip];
-    } else {
-        _args remoteExec [_func, _targets, _jip];
-    };
+
+    call RMT_RMT_EXEC;
 };
 
 EFL_fnc_callVariableEH = {
@@ -192,7 +208,7 @@ EFL_fnc_publicVariable = {
 
     VALID_VARNAME
 
-	[[_namespace, _varname, (missionNamespace getVariable _varname), _callEH], {
+	[[_NIL(_namespace), _varname, (missionNamespace getVariable _varname), _callEH], {
         params["_namespace", "_varname", "_value", ["_callEH", true]];
 
         VALID_NAMESPACE
@@ -208,25 +224,25 @@ EFL_fnc_publicVariable = {
 EFL_fnc_pushBackGlobal = {
     params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true]];
 
-    [_namespace, _varname, _NIL(_element), _unique, _callEH, true, true] call EFL_fnc_pushBackNet;
+    [_NIL(_namespace), _NIL(_varname), _NIL(_element), _unique, _callEH, true, true] call EFL_fnc_pushBackNet;
 };
 
 EFL_fnc_hashSetGlobal = {
     params["_namespace", "_varname", "_key", "_value", ["_callEH", true]];
 
-    [_namespace, _varname, _NIL(_key), _NIL(_value), _callEH, true, true] call EFL_fnc_hashSetNet;
+    [_NIL(_namespace), _NIL(_varname), _NIL(_key), _NIL(_value), _callEH, true, true] call EFL_fnc_hashSetNet;
 };
 
 EFL_fnc_removeFromArrayGlobal = {
     params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true]];
 
-    [_namespace, _varname, _NIL(_elements), _pop, _callEH, true, true] call EFL_fnc_removeFromArrayNet;
+    [_NIL(_namespace), _NIL(_varname), _NIL(_elements), _pop, _callEH, true, true] call EFL_fnc_removeFromArrayNet;
 };
 
 EFL_fnc_deleteAtGlobal = {
     params["_namespace", "_varname", "_key", ["_callEH", true]];
 
-    [_namespace, _varname, _NIL(_key), _callEH, true, true] call EFL_fnc_deleteAtNet;
+    [_NIL(_namespace), _NIL(_varname), _NIL(_key), _callEH, true, true] call EFL_fnc_deleteAtNet;
 };
 
 EFL_fnc_publicVariableServer = {
@@ -234,6 +250,6 @@ EFL_fnc_publicVariableServer = {
 
     VALID_VARNAME
 
-    [_NIL(_namespace), _varname, _callEH, 2, false] call EFL_fnc_publicVariable;
+    [_NIL(_namespace), _NIL(_varname), _callEH, 2, false] call EFL_fnc_publicVariable;
 };
 //-----------------------------------
