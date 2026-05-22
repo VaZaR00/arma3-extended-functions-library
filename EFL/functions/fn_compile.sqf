@@ -28,8 +28,6 @@ EFL_fnc_hashSetNet = {
 
     VALID_ARGS(_key)
 
-    if (isNil '_key') exitWith {};
-
 	[_this, {
     	params["_namespace", "_varname", "_key", "_value", ["_callEH", true]];
 
@@ -142,7 +140,6 @@ EFL_fnc_remoteExec = {
     }; \
 
     #define RMT_LOCAL_CALL { \
-        private _args = _this; \
         if (_isCallCommand) exitWith { \
             if !(_args isEqualType []) then { \
                 _args = [_args]; \
@@ -161,21 +158,70 @@ EFL_fnc_remoteExec = {
         _function call RMT_TYPE_CALL; \
     }; \
 
-    if (!isMultiplayer || {(_targets in [PLAYER_, false, clientOwner])}) exitWith {_args call RMT_LOCAL_CALL};
+    if (!isMultiplayer || {
+        (_targets in [PLAYER_, false, clientOwner]) || {
+            (_targets isEqualType objNull) && {
+                local _targets
+            }
+        }
+    }) exitWith {call RMT_LOCAL_CALL};
 
 	if !(_remoteSelfCall) then {
-		private _selfArgs = if ((_args isEqualType []) || {(_args isEqualType createHashMap)}) then {+_args} else {_args};
-		_selfArgs call RMT_LOCAL_CALL;
-        if !(_isCallCommand) then {
-            _args = [_args, _func];
+        private _hasPlayer = !(isNull player);
+		if (_targets isEqualTo 0) exitWith {
+            call RMT_LOCAL_CALL;
+            _targets = -clientOwner;
         };
-		private _funcRmt = {
-            params["_args", "_clientCaller", ["_isCallCommand", false]];
-            if (_clientCaller isEqualTo clientOwner) exitWith {}; 
-            _args call RMT_LOCAL_CALL;
+		if (_targets isEqualType west) exitWith {
+            if (_hasPlayer) exitWith {};
+            private _side = side player;
+            if (_side isNotEqualTo _targets) exitWith {};
+            _targets = allPlayers select {(side _x) isEqualTo _side};
+            _targets = _targets - [player];
+            call RMT_LOCAL_CALL;
         };
-		_args = [[_args, clientOwner, _isCallCommand], _funcRmt];
-        _func = if (_isCall) then {"call"} else {"spawn"};
+        if (_targets isEqualType []) exitWith {
+            private _localObjects = _targets findIf {IS_OBJ(_x) && {local _x}};
+            private _hasSelfSide = _hasPlayer && {(side player) in _targets};
+            private _hasSelfGroup = _hasPlayer && {(group player) in _targets};
+            private _hasSelfClient = clientOwner in _targets;
+            if ((_localObjects isEqualTo []) && {!(_hasSelfClient) && !(_hasSelfSide) && !(_hasSelfGroup)}) exitWith {};
+            // objects and client id 
+            _targets = (_targets - _localObjects) - [clientOwner];
+            // sides
+            private _sides = _targets select {_x isEqualType west};
+            if (_sides isNotEqualTo []) then {
+                private _sideTargets = [];
+                {
+                    private _side = _x;
+                    _sideTargets append (allPlayers select {(side _x) isEqualTo _side});
+                } forEach _sides;
+                _targets = ((_targets - _sides) + _sideTargets) - [player];
+            };
+            // groups
+            private _groups = _targets select {_x isEqualType grpNull};
+            if (_groups isNotEqualTo []) then {
+                private _groupTargets = [];
+                {
+                    private _group = _x;
+                    _groupTargets append (allPlayers select {(group _x) isEqualTo _group});
+                } forEach _groups;
+                _targets = ((_targets - _groups) + _groupTargets) - [player];
+            };
+            // var names
+            private _varNames = _targets select {_x isEqualType ""};
+            if (_varNames isNotEqualTo []) then {
+                private ["_obj"];
+                private _varNameTargets = _varNames apply {
+                    _obj = missionNamespace getVariable _x;
+                    if (isNil "_obj") then {_x} else {_obj};
+                };
+                _varNameTargets = _varNameTargets select {(_x isEqualType "") || {!(local _x)}};
+                _varNameTargets = _varNameTargets - [objNull];
+                _targets = _targets - _varNameTargets;
+            };
+            call RMT_LOCAL_CALL;
+        };
 	};
 
     call RMT_RMT_EXEC;
