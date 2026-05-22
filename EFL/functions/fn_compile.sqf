@@ -183,7 +183,7 @@ EFL_fnc_remoteExec = {
 
 EFL_fnc_callVariableEH = {
     params[["_varName", ""], ["_callParams", true]];
-    _callParams params[["_doCall", true], ["_ehFuncName", ""], ["_args", []]];
+    _callParams params[["_doCall", true], ["_args", []], ["_ehFuncName", ""]];
     
     if !(_doCall isEqualTo true) exitWith {};
 
