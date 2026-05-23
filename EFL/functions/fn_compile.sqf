@@ -166,7 +166,7 @@ EFL_fnc_remoteExec = {
         }
     }) exitWith {call RMT_LOCAL_CALL};
 
-	if !(_remoteSelfCall) then {
+	private _selfCallRes = if (_remoteSelfCall isNotEqualTo false) then {
         private _hasPlayer = !(isNull player);
 		if (_targets isEqualTo 0) exitWith {
             call RMT_LOCAL_CALL;
@@ -222,9 +222,15 @@ EFL_fnc_remoteExec = {
             };
             call RMT_LOCAL_CALL;
         };
-	};
+	} else {nil};
 
-    call RMT_RMT_EXEC;
+    private _remoteCallRes = call RMT_RMT_EXEC;
+
+    if (_remoteSelfCall isEqualTo true) exitWith {_NIL(_selfCallRes)};
+    if (_remoteSelfCall isEqualTo 0) exitWith {_NIL(_remoteCallRes)};
+    if (_remoteSelfCall isEqualTo 1) exitWith {[_NIL(_remoteCallRes), _NIL(_selfCallRes)]};
+
+    _NIL(_remoteCallRes)
 };
 
 EFL_fnc_callVariableEH = {
