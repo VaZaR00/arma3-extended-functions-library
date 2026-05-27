@@ -181,7 +181,7 @@ EFL_fnc_remoteExec = {
             call RMT_LOCAL_CALL;
         };
         if (_targets isEqualType []) exitWith {
-            private _localObjects = _targets findIf {IS_OBJ(_x) && {local _x}};
+            private _localObjects = _targets select {IS_OBJ(_x) && {local _x}};
             private _hasSelfSide = _hasPlayer && {(side player) in _targets};
             private _hasSelfGroup = _hasPlayer && {(group player) in _targets};
             private _hasSelfClient = clientOwner in _targets;
