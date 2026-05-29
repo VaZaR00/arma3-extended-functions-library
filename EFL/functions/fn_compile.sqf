@@ -155,9 +155,9 @@ EFL_fnc_remoteExec = {
 
     #define RMT_LOCAL_CALL { \
         if (_isCallCommand) exitWith { \
-            if (isNil "_args") then {
-                _args = [];
-            };
+            if (isNil "_args") then { \
+                _args = []; \
+            }; \
             if !(_args isEqualType []) then { \
                 _args = [_args]; \
             }; \
