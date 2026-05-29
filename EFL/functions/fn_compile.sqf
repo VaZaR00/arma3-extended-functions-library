@@ -20,7 +20,7 @@ EFL_fnc_pushBackNet = {
 		};
 		_namespace setVariable [_varname, _array];
         [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, _jip, true, false] call EFL_fnc_remoteExec;
+	}, _target, _jip, true, true] call EFL_fnc_remoteExec;
 };
 
 EFL_fnc_hashSetNet = {
@@ -37,7 +37,7 @@ EFL_fnc_hashSetNet = {
 		_hash set [_key, _NIL(_value)];
 		_namespace setVariable [_varname, _hash];
         [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, _jip, true, false] call EFL_fnc_remoteExec;
+	}, _target, _jip, true, true] call EFL_fnc_remoteExec;
 };
 
 EFL_fnc_removeFromArrayNet = {
@@ -67,7 +67,7 @@ EFL_fnc_removeFromArrayNet = {
 		};
 		_namespace setVariable [_varname, _array];
         [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, _jip, true, false] call EFL_fnc_remoteExec;
+	}, _target, _jip, true, true] call EFL_fnc_remoteExec;
 };
 
 EFL_fnc_deleteAtNet = {
@@ -84,16 +84,16 @@ EFL_fnc_deleteAtNet = {
 		_map deleteAt _key;
 		_namespace setVariable [_varname, _map];
         [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, _jip, true, false] call EFL_fnc_remoteExec;
+	}, _target, _jip, true, true] call EFL_fnc_remoteExec;
 };
 
 EFL_fnc_remoteExec = {
-    params[["_args", []], ["_func", "call"], ["_targets", 0], ["_jip", false], ["_call", false, [false]], ["_remoteSelfCall", true]];
+    params[["_args", nil], ["_func", "call"], ["_targets", 0], ["_jip", false], ["_call", false, [false]], ["_selfLocalCall", true]];
 
 	private _isCall = _call isEqualTo true;
 
     if (_func isEqualType {}) then {
-        _args = [_args, _func];
+        _args = [_NIL(_args), _func];
         _func = if (_isCall) then {"call"} else {"spawn"};
     };
 
@@ -108,7 +108,13 @@ EFL_fnc_remoteExec = {
             _targets = false;
         };
     };
-    if (_jip isEqualType objNull) then {
+    // jip
+    private _jipObjUseStr = false;
+    if (_jip isEqualType []) then {
+        _jipObjUseStr = true;
+        _jip = param [0, false];
+    };
+    if (_jipObjUseStr && {_jip isEqualType objNull}) then {
         private _netid = netId _jip;
         private _idArr = (_netid splitString ":");
         private _id = "0";
@@ -122,25 +128,36 @@ EFL_fnc_remoteExec = {
     };
 
     #define RMT_RMT_EXEC { \
-        if (_isCall) then { \
-            _args remoteExecCall [_func, _targets, _jip]; \
+        if (isNil "_args") then { \
+            if (_isCall) then { \
+                remoteExecCall [_func, _targets, _jip]; \
+            } else { \
+                remoteExec [_func, _targets, _jip]; \
+            }; \
         } else { \
-            _args remoteExec [_func, _targets, _jip]; \
+            if (_isCall) then { \
+                _args remoteExecCall [_func, _targets, _jip]; \
+            } else { \
+                _args remoteExec [_func, _targets, _jip]; \
+            }; \
         }; \
     }; \
 
     #define RMT_TYPE_CALL { \
         if (_isCall) exitWith { \
-            isNil{_args call _this} \
+            isNil{IF_NIL(_args, []) call _this} \
         }; \
         if (_func isEqualTo "spawn") exitWith { \
-            _args spawn _this \
+            IF_NIL(_args, []) spawn _this \
         }; \
-        _args call _this; \
+        IF_NIL(_args, []) call _this; \
     }; \
 
     #define RMT_LOCAL_CALL { \
         if (_isCallCommand) exitWith { \
+            if (isNil "_args") then {
+                _args = [];
+            };
             if !(_args isEqualType []) then { \
                 _args = [_args]; \
             }; \
@@ -166,7 +183,7 @@ EFL_fnc_remoteExec = {
         }
     }) exitWith {call RMT_LOCAL_CALL};
 
-	private _selfCallRes = if (_remoteSelfCall isNotEqualTo false) then {
+	private _selfCallRes = if (_selfLocalCall isNotEqualTo false) then {
         private _hasPlayer = !(isNull player);
 		if (_targets isEqualTo 0) exitWith {
             call RMT_LOCAL_CALL;
@@ -226,9 +243,9 @@ EFL_fnc_remoteExec = {
 
     private _remoteCallRes = call RMT_RMT_EXEC;
 
-    if (_remoteSelfCall isEqualTo true) exitWith {_NIL(_selfCallRes)};
-    if (_remoteSelfCall isEqualTo 0) exitWith {_NIL(_remoteCallRes)};
-    if (_remoteSelfCall isEqualTo 1) exitWith {[_NIL(_remoteCallRes), _NIL(_selfCallRes)]};
+    if (_selfLocalCall isEqualTo true) exitWith {_NIL(_selfCallRes)};
+    if (_selfLocalCall isEqualTo 0) exitWith {_NIL(_remoteCallRes)};
+    if (_selfLocalCall isEqualTo 1) exitWith {[_NIL(_remoteCallRes), _NIL(_selfCallRes)]};
 
     _NIL(_remoteCallRes)
 };
@@ -272,7 +289,7 @@ EFL_fnc_publicVariable = {
 		
         _namespace setVariable [_varname, _NIL(_value)];
         [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, if (isNil "_jip") then {_target isEqualTo true} else {false}, true, false] call EFL_fnc_remoteExec;
+	}, _target, if (isNil "_jip") then {_target isEqualTo true} else {false}, true, true] call EFL_fnc_remoteExec;
 };
 //-----------------------------------
 
