@@ -1,5 +1,42 @@
 #include "defines.hpp" 
 
+//-------------- DIAG ---------------
+EFL_fnc_diagRemoteExec = {
+    [[serverTime, [_func, _targets, _jip], _NIL(_args), [IF_NIL(_fnc_scriptName, __FILE_NAME__), IF_NIL(_fnc_scriptNameParent, __FILE_NAME__)], [_NIL(_className), _NIL(_methodName)]], { 
+        params["_senderTime", "_rmtParams", ["_args", nil], ["_callFileName", nil], ["_classData", nil]];
+        _args = if !(isNil "_args") then {
+            if !(_args isEqualType []) then {_args = [_args]};
+            private _procArgs = {
+                if (_this isEqualType []) exitWith {
+                    _this apply {
+                        _x call _procArgs;
+                    };
+                };
+                if (_this isEqualType {}) then {(format["{%1}", (str _this) select [0, 30]])} else {_this};
+            };
+            _args apply {_x call _procArgs};
+        } else {nil};
+
+        (IF_NIL(_callFileName, [])) params [["_funcName", ""], ["_parentFuncName", ""]];
+
+        private _funcNames = format["[THIS_FUNC: '%1', PARENT_FUNC: '%2']", _funcName, _parentFuncName];
+
+        private _data = format["REMOTE EXECUTED CODE :: FUNCS: %1 | CLASS: %2 | TIME: %3 | REMOTE_EXEC PARAMS: %4 | ARGS: %5", 
+            _funcNames, 
+            _NIL(_classData), 
+            [serverTime, _senderTime, serverTime - _senderTime], 
+            _rmtParams, 
+            _NIL(_args)
+        ];
+        
+        private _logVarName = (IF_NIL(_ADDON_PREFX, "TTT")) + '_remoteExec_logCounter';
+        private _log = MGVAR [_logVarName, []];
+        _log pushBack _data;
+        MSVAR [_logVarName, _log];
+        _data DLOG
+    }] remoteExecCall ["call", _targets, _jip];
+};
+//-----------------------------------
 
 //-------------- CORE ---------------
 EFL_fnc_pushBackNet = {
@@ -127,7 +164,13 @@ EFL_fnc_remoteExec = {
         _jip = VAR_PREFIX + "_jip_remote_exec_id_" + _id;
     };
 
+    #define RMT_EXEC_DIAG_LOG 
+    #ifdef DIAG_NET
+        #define RMT_EXEC_DIAG_LOG 0 call EFL_fnc_diagRemoteExec;
+    #endif
+
     #define RMT_RMT_EXEC { \
+        RMT_EXEC_DIAG_LOG \
         if (isNil "_args") then { \
             if (_isCall) then { \
                 remoteExecCall [_func, _targets, _jip]; \
@@ -239,6 +282,7 @@ EFL_fnc_remoteExec = {
             };
             call RMT_LOCAL_CALL;
         };
+        _selfLocalCall = false;
 	} else {nil};
 
     private _remoteCallRes = call RMT_RMT_EXEC;

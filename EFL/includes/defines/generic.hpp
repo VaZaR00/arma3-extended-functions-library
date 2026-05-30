@@ -52,6 +52,7 @@
 #define _NIL(var) (if !(isNil STR(var)) then {var})
 #define NIL_DEF _NIL(_def)
 #define MGVAR missionNamespace getVariable
+#define MSVAR missionNamespace setVariable
 #define CHECK_EX(c) if (c) exitWith {false};
 #define LOC localize
 #define SKIP continue
