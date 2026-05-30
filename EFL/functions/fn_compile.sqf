@@ -34,7 +34,7 @@ EFL_fnc_diagRemoteExec = {
         _log pushBack _data;
         MSVAR [_logVarName, _log];
         _data DLOG
-    }] remoteExecCall ["call", _targets, _jip];
+    }] remoteExecCall [CALL_FUNC, _targets, _jip];
 };
 //-----------------------------------
 
@@ -125,18 +125,18 @@ EFL_fnc_deleteAtNet = {
 };
 
 EFL_fnc_remoteExec = {
-    params[["_args", nil], ["_func", "call"], ["_targets", 0], ["_jip", false], ["_call", false, [false]], ["_selfLocalCall", true]];
+    params[["_args", nil], ["_func", CALL_FUNC], ["_targets", 0], ["_jip", false], ["_call", false, [false]], ["_selfLocalCall", true]];
 
 	private _isCall = _call isEqualTo true;
 
     if (_func isEqualType {}) then {
         _args = [_NIL(_args), _func];
-        _func = if (_isCall) then {"call"} else {"spawn"};
+        _func = if (_isCall) then {CALL_FUNC} else {SPAWN_FUNC};
     };
 
     if !(_func isEqualType "") exitWith {format["EFL_fnc_remoteExec ERROR: func not str or code. Func type: %1. Func value: %2", typeName _func, _func] WARN};
 
-    private _isCallCommand = _func in ["call", "spawn"];
+    private _isCallCommand = _func in [CALL_FUNC, SPAWN_FUNC];
 
     if (_targets isEqualType true) then {
         if (_targets isEqualTo true) then {
@@ -190,7 +190,7 @@ EFL_fnc_remoteExec = {
         if (_isCall) exitWith { \
             isNil{IF_NIL(_args, []) call _this} \
         }; \
-        if (_func isEqualTo "spawn") exitWith { \
+        if (_func isEqualTo SPAWN_FUNC) exitWith { \
             IF_NIL(_args, []) spawn _this \
         }; \
         IF_NIL(_args, []) call _this; \
@@ -226,7 +226,7 @@ EFL_fnc_remoteExec = {
         }
     }) exitWith {call RMT_LOCAL_CALL};
 
-	private _selfCallRes = if (_selfLocalCall isNotEqualTo false) then {
+	private _selfCallRes = if ((IF_NIL(_selfLocalCall, false)) isNotEqualTo false) then {
         private _hasPlayer = !(isNull player);
 		if (_targets isEqualTo 0) exitWith {
             call RMT_LOCAL_CALL;
@@ -283,6 +283,7 @@ EFL_fnc_remoteExec = {
             call RMT_LOCAL_CALL;
         };
         _selfLocalCall = false;
+        nil
 	} else {nil};
 
     private _remoteCallRes = call RMT_RMT_EXEC;
