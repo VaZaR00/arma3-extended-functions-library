@@ -192,3 +192,6 @@ _serverExecResult; \
 #define ALOG_V T_LOG
 #define ALOG call {private _arr = (if (isNil STR(ALOG_V)) then {ALOG_V = []; ALOG_V} else {ALOG_V}); _arr pushback [diag_tickTime, count _arr, _this]};
 #define ARLOG call {ALOG; _this RLOG};
+
+
+#define COMPILE_FUNC call {if (_final) then {compileFinal _this} else {_this}};
