@@ -44,20 +44,22 @@ EFL_fnc_pushBackNet = {
 
     VALID_ARGS(_element)
 
-	[_this, {
-    	params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true]];
+    ["EFL_pushBack", _this, _target, _jip] call EFL_fnc_remoteEvent;
+};
 
-        VALID_NAMESPACE
-    
-		private _array = _namespace getVariable [_varname, []];
-		if (_unique) then {
-			_array pushBackUnique _element;
-		} else {
-			_array pushBack _element;
-		};
-		_namespace setVariable [_varname, _array];
-        [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, _jip, true, true] call EFL_fnc_remoteExec;
+EFL_fnc_pushBack = {
+    params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true]];
+
+    VALID_NAMESPACE
+
+    private _array = _namespace getVariable [_varname, []];
+    if (_unique) then {
+        _array pushBackUnique _element;
+    } else {
+        _array pushBack _element;
+    };
+    _namespace setVariable [_varname, _array];
+    [_varname, _callEH] call EFL_fnc_callVariableEH;
 };
 
 EFL_fnc_hashSetNet = {
@@ -65,16 +67,18 @@ EFL_fnc_hashSetNet = {
 
     VALID_ARGS(_key)
 
-	[_this, {
-    	params["_namespace", "_varname", "_key", "_value", ["_callEH", true]];
+    ["EFL_hashSet", _this, _target, _jip] call EFL_fnc_remoteEvent;
+};
 
-        VALID_NAMESPACE
-    
-		private _hash = _namespace getVariable [_varname, createHashMap];
-		_hash set [_key, _NIL(_value)];
-		_namespace setVariable [_varname, _hash];
-        [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, _jip, true, true] call EFL_fnc_remoteExec;
+EFL_fnc_hashSet = {
+    params["_namespace", "_varname", "_key", "_value", ["_callEH", true]];
+
+    VALID_NAMESPACE
+
+    private _hash = _namespace getVariable [_varname, createHashMap];
+    _hash set [_key, _NIL(_value)];
+    _namespace setVariable [_varname, _hash];
+    [_varname, _callEH] call EFL_fnc_callVariableEH;
 };
 
 EFL_fnc_removeFromArrayNet = {
@@ -82,29 +86,31 @@ EFL_fnc_removeFromArrayNet = {
 
     VALID_ARGS(_elements)
 
-	[_this, {
-    	params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true]];
+    ["EFL_removeFromArray", _this, _target, _jip] call EFL_fnc_remoteEvent;
+};
 
-        VALID_NAMESPACE
-            
-        if !(_elements isEqualType []) then {
-            _elements = [_elements];
-        };
-    
-		private _array = _namespace getVariable [_varname, []];
-		if (_pop) then {
-            // delete last element
-			{
-                if (_x in _elements) exitWith {
-                    _array deleteAt _forEachIndex;
-                };
-            } forEachReversed _array;
-		} else {
-			_array = _array - _elements;
-		};
-		_namespace setVariable [_varname, _array];
-        [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, _jip, true, true] call EFL_fnc_remoteExec;
+EFL_fnc_removeFromArray = {
+    params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true]];
+
+    VALID_NAMESPACE
+        
+    if !(_elements isEqualType []) then {
+        _elements = [_elements];
+    };
+
+    private _array = _namespace getVariable [_varname, []];
+    if (_pop) then {
+        // delete last element
+        {
+            if (_x in _elements) exitWith {
+                _array deleteAt _forEachIndex;
+            };
+        } forEachReversed _array;
+    } else {
+        _array = _array - _elements;
+    };
+    _namespace setVariable [_varname, _array];
+    [_varname, _callEH] call EFL_fnc_callVariableEH;
 };
 
 EFL_fnc_deleteAtNet = {
@@ -112,16 +118,18 @@ EFL_fnc_deleteAtNet = {
 
     VALID_ARGS(_key)
     
-	[_this, {
-    	params["_namespace", "_varname", "_key", ["_callEH", true]];
+    ["EFL_deleteAt", _this, _target, _jip] call EFL_fnc_remoteEvent;
+};
 
-        VALID_NAMESPACE
-    
-		private _map = _namespace getVariable [_varname, []];
-		_map deleteAt _key;
-		_namespace setVariable [_varname, _map];
-        [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, _jip, true, true] call EFL_fnc_remoteExec;
+EFL_fnc_deleteAt = {
+    params["_namespace", "_varname", "_key", ["_callEH", true]];
+
+    VALID_NAMESPACE
+
+    private _map = _namespace getVariable [_varname, []];
+    _map deleteAt _key;
+    _namespace setVariable [_varname, _map];
+    [_varname, _callEH] call EFL_fnc_callVariableEH;
 };
 
 EFL_fnc_remoteExec = {
@@ -295,6 +303,38 @@ EFL_fnc_remoteExec = {
     _NIL(_remoteCallRes)
 };
 
+EFL_fnc_remoteEvent = {
+    params["_eventName", ["_args", []], ["_target", false], ["_jip", false]];
+
+    if (_target in [false, clientOwner]) exitWith {
+        [_eventName, _args] call CBA_fnc_localEvent;
+    };
+    if (_target isEqualTo 2) exitWith {
+        [_eventName, _args] call CBA_fnc_serverEvent;
+    };
+    if (_target isEqualTo true) exitWith {
+        if !(_jip isEqualTypeAny ["", objNull]) then {
+            _jip = "";
+        };
+        [_eventName, _args, _NIL(_jip)] call CBA_fnc_globalEventJIP;
+    };
+    if (_target isEqualTo 0) exitWith {
+        [_eventName, _args] call CBA_fnc_globalEvent;
+    };
+    if (_target isEqualType 1) exitWith {
+        [_eventName, _args, _target] call CBA_fnc_ownerEvent;
+    };
+    if (_target isEqualType objNull) exitWith {
+        [_eventName, _args, _target] call CBA_fnc_targetEvent;
+    };
+    if (_target isEqualType []) exitWith {
+        {
+            [_eventName, _args, _x] call EFL_fnc_remoteEvent;
+        } forEach _target;
+    };
+    [_eventName, _args] call CBA_fnc_localEvent;
+};
+
 EFL_fnc_callVariableEH = {
     params[["_varName", ""], ["_callParams", true]];
     _callParams params[["_doCall", true], ["_args", []], ["_ehFuncName", ""]];
@@ -327,14 +367,17 @@ EFL_fnc_publicVariable = {
 
     VALID_VARNAME
 
-	[[_NIL(_namespace), _varname, (missionNamespace getVariable _varname), _callEH], {
-        params["_namespace", "_varname", "_value", ["_callEH", true]];
+    _jip = if (isNil "_jip") then {_target isEqualTo true} else {false};
+    ["EFL_setVariable", [_NIL(_namespace), _varname, (missionNamespace getVariable _varname), _callEH], _target, _jip] call EFL_fnc_remoteEvent;
+};
 
-        VALID_NAMESPACE
-		
-        _namespace setVariable [_varname, _NIL(_value)];
-        [_varname, _callEH] call EFL_fnc_callVariableEH;
-	}, _target, if (isNil "_jip") then {_target isEqualTo true} else {false}, true, true] call EFL_fnc_remoteExec;
+EFL_fnc_setVariable = {
+    params["_namespace", "_varname", "_value", ["_callEH", true]];
+
+    VALID_NAMESPACE
+    
+    _namespace setVariable [_varname, _NIL(_value)];
+    [_varname, _callEH] call EFL_fnc_callVariableEH;
 };
 //-----------------------------------
 

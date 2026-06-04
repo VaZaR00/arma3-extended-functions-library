@@ -11,5 +11,5 @@
     prefix##_remoteExec_logCounter pushbackunique _data; \
     _this call prefix##_fnc_remoteexec; \
 }
-// #define CFM_fnc_remoteExec TEST_REMOTE_EXEC(CFM)
+// #define CFM_fnc_remoteEvent TEST_REMOTE_EXEC(CFM)
 // #define OOP_fnc_remoteExec TEST_REMOTE_EXEC(OOP)
