@@ -1,12 +1,12 @@
 #include "defines.hpp" 
 
 //-------------- DIAG ---------------
-EFL_fnc_diagRemoteExec = {
+FUNC(diagRemoteExec) = {
     [[serverTime, [_func, _targets, _jip], _NIL(_args), [IF_NIL(_fnc_scriptName, __FILE_NAME__), IF_NIL(_fnc_scriptNameParent, __FILE_NAME__)], [_NIL(_className), _NIL(_methodName)]], { 
         params["_senderTime", "_rmtParams", ["_args", nil], ["_callFileName", nil], ["_classData", nil]];
         _args = if !(isNil "_args") then {
             if !(_args isEqualType []) then {_args = [_args]};
-            private _procArgs = {
+            private _procArgs) = {
                 if (_this isEqualType []) exitWith {
                     _this apply {
                         _x call _procArgs;
@@ -39,15 +39,15 @@ EFL_fnc_diagRemoteExec = {
 //-----------------------------------
 
 //-------------- CORE ---------------
-EFL_fnc_pushBackNet = {
+FUNC(pushBackNet) = {
     params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true], ["_target", true], ["_jip", true]];
 
     VALID_ARGS(_element)
 
-    ["EFL_pushBack", _this, _target, _jip] call EFL_fnc_remoteEvent;
+    [SPREF(pushBack), _this, _target, _jip] call FUNC(remoteEvent);
 };
 
-EFL_fnc_pushBack = {
+FUNC(pushBack) = {
     params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true]];
 
     VALID_NAMESPACE
@@ -59,18 +59,18 @@ EFL_fnc_pushBack = {
         _array pushBack _element;
     };
     _namespace setVariable [_varname, _array];
-    [_varname, _callEH] call EFL_fnc_callVariableEH;
+    [_varname, _callEH] call FUNC(callVariableEH);
 };
 
-EFL_fnc_hashSetNet = {
+FUNC(hashSetNet) = {
     params["_namespace", "_varname", "_key", "_value", ["_callEH", true], ["_target", true], ["_jip", true]];
 
     VALID_ARGS(_key)
 
-    ["EFL_hashSet", _this, _target, _jip] call EFL_fnc_remoteEvent;
+    [SPREF(hashSet), _this, _target, _jip] call FUNC(remoteEvent);
 };
 
-EFL_fnc_hashSet = {
+FUNC(hashSet) = {
     params["_namespace", "_varname", "_key", "_value", ["_callEH", true]];
 
     VALID_NAMESPACE
@@ -78,18 +78,18 @@ EFL_fnc_hashSet = {
     private _hash = _namespace getVariable [_varname, createHashMap];
     _hash set [_key, _NIL(_value)];
     _namespace setVariable [_varname, _hash];
-    [_varname, _callEH] call EFL_fnc_callVariableEH;
+    [_varname, _callEH] call FUNC(callVariableEH);
 };
 
-EFL_fnc_removeFromArrayNet = {
+FUNC(removeFromArrayNet) = {
     params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true], ["_target", true], ["_jip", true]];
 
     VALID_ARGS(_elements)
 
-    ["EFL_removeFromArray", _this, _target, _jip] call EFL_fnc_remoteEvent;
+    [SPREF(removeFromArray), _this, _target, _jip] call FUNC(remoteEvent);
 };
 
-EFL_fnc_removeFromArray = {
+FUNC(removeFromArray) = {
     params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true]];
 
     VALID_NAMESPACE
@@ -110,18 +110,18 @@ EFL_fnc_removeFromArray = {
         _array = _array - _elements;
     };
     _namespace setVariable [_varname, _array];
-    [_varname, _callEH] call EFL_fnc_callVariableEH;
+    [_varname, _callEH] call FUNC(callVariableEH);
 };
 
-EFL_fnc_deleteAtNet = {
+FUNC(deleteAtNet) = {
     params["_namespace", "_varname", "_key", ["_callEH", true], ["_target", true], ["_jip", true]];
 
     VALID_ARGS(_key)
     
-    ["EFL_deleteAt", _this, _target, _jip] call EFL_fnc_remoteEvent;
+    [SPREF(deleteAt), _this, _target, _jip] call FUNC(remoteEvent);
 };
 
-EFL_fnc_deleteAt = {
+FUNC(deleteAt) = {
     params["_namespace", "_varname", "_key", ["_callEH", true]];
 
     VALID_NAMESPACE
@@ -129,10 +129,10 @@ EFL_fnc_deleteAt = {
     private _map = _namespace getVariable [_varname, []];
     _map deleteAt _key;
     _namespace setVariable [_varname, _map];
-    [_varname, _callEH] call EFL_fnc_callVariableEH;
+    [_varname, _callEH] call FUNC(callVariableEH);
 };
 
-EFL_fnc_remoteExec = {
+FUNC(remoteExec) = {
     params[["_args", nil], ["_func", CALL_FUNC], ["_targets", 0], ["_jip", false], ["_call", false, [false]], ["_selfLocalCall", true]];
 
 	private _isCall = _call isEqualTo true;
@@ -142,7 +142,7 @@ EFL_fnc_remoteExec = {
         _func = if (_isCall) then {CALL_FUNC} else {SPAWN_FUNC};
     };
 
-    if !(_func isEqualType "") exitWith {format["EFL_fnc_remoteExec ERROR: func not str or code. Func type: %1. Func value: %2", typeName _func, _func] WARN};
+    if !(_func isEqualType "") exitWith {format["FUNC(remoteExec ERROR: func not str or code. Func type: %1. Func value: %2", typeName _func, _func] WARN};
 
     private _isCallCommand = _func in [CALL_FUNC, SPAWN_FUNC];
 
@@ -174,7 +174,7 @@ EFL_fnc_remoteExec = {
 
     #define RMT_EXEC_DIAG_LOG 
     #ifdef DIAG_NET
-        #define RMT_EXEC_DIAG_LOG 0 call EFL_fnc_diagRemoteExec;
+        #define RMT_EXEC_DIAG_LOG 0 call FUNC(diagRemoteExec);
     #endif
 
     #define RMT_RMT_EXEC { \
@@ -220,7 +220,7 @@ EFL_fnc_remoteExec = {
         }; \
         private _function = missionNamespace getVariable _func; \
         if (isNil "_function") exitWith { \
-            format["EFL_fnc_remoteExec ERROR: func '%1' not found!", _func] WARN; \
+            format["FUNC(remoteExec ERROR: func '%1' not found!", _func] WARN; \
             call RMT_RMT_EXEC; \
         }; \
         _function call RMT_TYPE_CALL; \
@@ -303,7 +303,7 @@ EFL_fnc_remoteExec = {
     _NIL(_remoteCallRes)
 };
 
-EFL_fnc_remoteEvent = {
+FUNC(remoteEvent) = {
     params["_eventName", ["_args", []], ["_target", false], ["_jip", false]];
 
     if (_target in [false, clientOwner]) exitWith {
@@ -329,13 +329,13 @@ EFL_fnc_remoteEvent = {
     };
     if (_target isEqualType []) exitWith {
         {
-            [_eventName, _args, _x] call EFL_fnc_remoteEvent;
+            [_eventName, _args, _x] call FUNC(remoteEvent);
         } forEach _target;
     };
     [_eventName, _args] call CBA_fnc_localEvent;
 };
 
-EFL_fnc_callVariableEH = {
+FUNC(callVariableEH) = {
     params[["_varName", ""], ["_callParams", true]];
     _callParams params[["_doCall", true], ["_args", []], ["_ehFuncName", ""]];
     
@@ -345,7 +345,7 @@ EFL_fnc_callVariableEH = {
 
     private _ehFuncName = "";
     if (_suffix isEqualTo "") then {
-        _suffix = missionNamespace getVariable ["EFL_variablesEHsuffix", "_publicEH"];
+        _suffix = missionNamespace getVariable [SPREF(variablesEHsuffix), "_publicEH"];
         _isFullName = false;
     };
     if (_isFullName) then {
@@ -357,7 +357,7 @@ EFL_fnc_callVariableEH = {
     _args call (missionNamespace getVariable [_ehFuncName, {}]);
 };
 
-EFL_fnc_publicVariable = {
+FUNC(publicVariable) = {
     private _namespace = _this param [0, nil];
     if (!(isNil "_namespace") && {_namespace isEqualType ""}) then {
         _this = [missionNamespace] + (if (_this isEqualType []) then {_this} else {[_this]});
@@ -368,48 +368,48 @@ EFL_fnc_publicVariable = {
     VALID_VARNAME
 
     _jip = if (isNil "_jip") then {_target isEqualTo true} else {false};
-    ["EFL_setVariable", [_NIL(_namespace), _varname, (missionNamespace getVariable _varname), _callEH], _target, _jip] call EFL_fnc_remoteEvent;
+    [SPREF(setVariable), [_NIL(_namespace), _varname, (missionNamespace getVariable _varname), _callEH], _target, _jip] call FUNC(remoteEvent);
 };
 
-EFL_fnc_setVariable = {
+FUNC(setVariable) = {
     params["_namespace", "_varname", "_value", ["_callEH", true]];
 
     VALID_NAMESPACE
     
     _namespace setVariable [_varname, _NIL(_value)];
-    [_varname, _callEH] call EFL_fnc_callVariableEH;
+    [_varname, _callEH] call FUNC(callVariableEH);
 };
 //-----------------------------------
 
 
 //-------------- WRAPPERS ---------------
-EFL_fnc_pushBackGlobal = {
+FUNC(pushBackGlobal) = {
     params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true]];
 
-    [_NIL(_namespace), _NIL(_varname), _NIL(_element), _unique, _callEH, true, true] call EFL_fnc_pushBackNet;
+    [_NIL(_namespace), _NIL(_varname), _NIL(_element), _unique, _callEH, true, true] call FUNC(pushBackNet);
 };
 
-EFL_fnc_hashSetGlobal = {
+FUNC(hashSetGlobal) = {
     params["_namespace", "_varname", "_key", "_value", ["_callEH", true]];
 
-    [_NIL(_namespace), _NIL(_varname), _NIL(_key), _NIL(_value), _callEH, true, true] call EFL_fnc_hashSetNet;
+    [_NIL(_namespace), _NIL(_varname), _NIL(_key), _NIL(_value), _callEH, true, true] call FUNC(hashSetNet);
 };
 
-EFL_fnc_removeFromArrayGlobal = {
+FUNC(removeFromArrayGlobal) = {
     params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true]];
 
-    [_NIL(_namespace), _NIL(_varname), _NIL(_elements), _pop, _callEH, true, true] call EFL_fnc_removeFromArrayNet;
+    [_NIL(_namespace), _NIL(_varname), _NIL(_elements), _pop, _callEH, true, true] call FUNC(removeFromArrayNet);
 };
 
-EFL_fnc_deleteAtGlobal = {
+FUNC(deleteAtGlobal) = {
     params["_namespace", "_varname", "_key", ["_callEH", true]];
 
-    [_NIL(_namespace), _NIL(_varname), _NIL(_key), _callEH, true, true] call EFL_fnc_deleteAtNet;
+    [_NIL(_namespace), _NIL(_varname), _NIL(_key), _callEH, true, true] call FUNC(deleteAtNet);
 };
 
-EFL_fnc_publicVariableServer = {
+FUNC(publicVariableServer) = {
     params["_namespace", "_varname", ["_callEH", true]];
 
-    [_NIL(_namespace), _NIL(_varname), _callEH, 2, false] call EFL_fnc_publicVariable;
+    [_NIL(_namespace), _NIL(_varname), _callEH, 2, false] call FUNC(publicVariable);
 };
 //-----------------------------------

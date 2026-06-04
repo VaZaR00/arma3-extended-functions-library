@@ -14,6 +14,8 @@
 #define PREF_FNC PREFX##_fnc_
 #define PREFVAR PREF_
 #define SPREFVAR(var) STR(DOUBLE(PREF_, var))
+#define PREF(s) PREF_##s
+#define SPREF(s) STR(PREF(s))
 #define FUNC(f) PREF_FNC##f
 #define SFUNC(f) STR(FUNC(f))
 #define SFUNC_NAME(name) (STR(PREF_FNC) + name)
