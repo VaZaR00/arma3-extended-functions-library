@@ -6,7 +6,7 @@ FUNC(diagRemoteExec) = {
         params["_senderTime", "_rmtParams", ["_args", nil], ["_callFileName", nil], ["_classData", nil]];
         _args = if !(isNil "_args") then {
             if !(_args isEqualType []) then {_args = [_args]};
-            private _procArgs) = {
+            private _procArgs = {
                 if (_this isEqualType []) exitWith {
                     _this apply {
                         _x call _procArgs;
