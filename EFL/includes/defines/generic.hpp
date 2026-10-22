@@ -71,7 +71,7 @@
 #define IF_EXW(c, t) if (c) exitWith {t}
 #define IF_ELSE_EX(c, t, t1) if (c) exitWith {t} else {t1}
 #define IF_NIL_EX(v) if (ISNIL(v)) EX;
-#define IF_NIL(v, d) IF_ELSE(ISNIL(v), d, v)
+#define IF_NIL(v, d) (IF_ELSE(ISNIL(v), d, v))
 #define NIL_(v) IF_NIL(v, nil)
 #define SET_IF_NIL(v, d) IF_ELSE(ISNIL(v), v = d, v)
 #define IS_OBJNULL(o) (o isEqualTo objNull)
