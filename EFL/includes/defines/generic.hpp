@@ -82,6 +82,7 @@
 #define ARR_EMPTY(a) (a isEqualTo [])
 #define LWR(s) (toLower s)
 #define FOR_I(n) for "_i" from 0 to (n - 1) do
+#define SPLIT_CHARACTERS ";,.- "
 
 #define ARGS PR _args = 
 
