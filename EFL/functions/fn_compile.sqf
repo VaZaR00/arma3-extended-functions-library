@@ -1,7 +1,11 @@
 #include "defines.hpp" 
 
+#ifndef FINAL
+#define CFUNC(f) FUNC(f)
+#endif
+
 //-------------- DIAG ---------------
-FUNC(diagRemoteExec) = {
+CFUNC(diagRemoteExec) = {
     [[serverTime, [_func, _targets, _jip], _NIL(_args), [IF_NIL(_fnc_scriptName, __FILE_NAME__), IF_NIL(_fnc_scriptNameParent, __FILE_NAME__)], [_NIL(_className), _NIL(_methodName)]], { 
         params["_senderTime", "_rmtParams", ["_args", nil], ["_callFileName", nil], ["_classData", nil]];
         _args = if !(isNil "_args") then {
@@ -39,7 +43,7 @@ FUNC(diagRemoteExec) = {
 //-----------------------------------
 
 //-------------- CORE ---------------
-FUNC(pushBackNet) = {
+CFUNC(pushBackNet) = {
     params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true], ["_target", true], ["_jip", true]];
 
     VALID_ARGS(_element)
@@ -47,7 +51,7 @@ FUNC(pushBackNet) = {
     [SPREF(pushBack), _this, _target, _jip] call FUNC(remoteEvent);
 };
 
-FUNC(pushBack) = {
+CFUNC(pushBack) = {
     params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true]];
 
     VALID_NAMESPACE
@@ -62,7 +66,7 @@ FUNC(pushBack) = {
     [_varname, _callEH] call FUNC(callVariableEH);
 };
 
-FUNC(hashSetNet) = {
+CFUNC(hashSetNet) = {
     params["_namespace", "_varname", "_key", "_value", ["_callEH", true], ["_target", true], ["_jip", true]];
 
     VALID_ARGS(_key)
@@ -70,7 +74,7 @@ FUNC(hashSetNet) = {
     [SPREF(hashSet), _this, _target, _jip] call FUNC(remoteEvent);
 };
 
-FUNC(hashSet) = {
+CFUNC(hashSet) = {
     params["_namespace", "_varname", "_key", "_value", ["_callEH", true]];
 
     VALID_NAMESPACE
@@ -81,7 +85,7 @@ FUNC(hashSet) = {
     [_varname, _callEH] call FUNC(callVariableEH);
 };
 
-FUNC(removeFromArrayNet) = {
+CFUNC(removeFromArrayNet) = {
     params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true], ["_target", true], ["_jip", true]];
 
     VALID_ARGS(_elements)
@@ -89,7 +93,7 @@ FUNC(removeFromArrayNet) = {
     [SPREF(removeFromArray), _this, _target, _jip] call FUNC(remoteEvent);
 };
 
-FUNC(removeFromArray) = {
+CFUNC(removeFromArray) = {
     params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true]];
 
     VALID_NAMESPACE
@@ -113,7 +117,7 @@ FUNC(removeFromArray) = {
     [_varname, _callEH] call FUNC(callVariableEH);
 };
 
-FUNC(deleteAtNet) = {
+CFUNC(deleteAtNet) = {
     params["_namespace", "_varname", "_key", ["_callEH", true], ["_target", true], ["_jip", true]];
 
     VALID_ARGS(_key)
@@ -121,7 +125,7 @@ FUNC(deleteAtNet) = {
     [SPREF(deleteAt), _this, _target, _jip] call FUNC(remoteEvent);
 };
 
-FUNC(deleteAt) = {
+CFUNC(deleteAt) = {
     params["_namespace", "_varname", "_key", ["_callEH", true]];
 
     VALID_NAMESPACE
@@ -132,7 +136,7 @@ FUNC(deleteAt) = {
     [_varname, _callEH] call FUNC(callVariableEH);
 };
 
-FUNC(remoteExec) = {
+CFUNC(remoteExec) = {
     params[["_args", nil], ["_func", CALL_FUNC], ["_targets", 0], ["_jip", false], ["_call", false, [false]], ["_selfLocalCall", true]];
 
 	private _isCall = _call isEqualTo true;
@@ -303,7 +307,7 @@ FUNC(remoteExec) = {
     _NIL(_remoteCallRes)
 };
 
-FUNC(remoteEvent) = {
+CFUNC(remoteEvent) = {
     params["_eventName", ["_args", []], ["_target", false], ["_jip", false]];
 
     if (_target in [false, clientOwner]) exitWith {
@@ -335,7 +339,7 @@ FUNC(remoteEvent) = {
     [_eventName, _args] call CBA_fnc_localEvent;
 };
 
-FUNC(callVariableEH) = {
+CFUNC(callVariableEH) = {
     params[["_varName", ""], ["_callParams", true]];
     _callParams params[["_doCall", true], ["_args", []], ["_ehFuncName", ""]];
     
@@ -357,7 +361,7 @@ FUNC(callVariableEH) = {
     _args call (missionNamespace getVariable [_ehFuncName, {}]);
 };
 
-FUNC(publicVariable) = {
+CFUNC(publicVariable) = {
     private _namespace = _this param [0, nil];
     if (!(isNil "_namespace") && {_namespace isEqualType ""}) then {
         _this = [missionNamespace] + (if (_this isEqualType []) then {_this} else {[_this]});
@@ -371,7 +375,7 @@ FUNC(publicVariable) = {
     [SPREF(setVariable), [_NIL(_namespace), _varname, (missionNamespace getVariable _varname), _callEH], _target, _jip] call FUNC(remoteEvent);
 };
 
-FUNC(setVariable) = {
+CFUNC(setVariable) = {
     params["_namespace", "_varname", "_value", ["_callEH", true]];
 
     VALID_NAMESPACE
@@ -383,31 +387,31 @@ FUNC(setVariable) = {
 
 
 //-------------- WRAPPERS ---------------
-FUNC(pushBackGlobal) = {
+CFUNC(pushBackGlobal) = {
     params["_namespace", "_varname", "_element", ["_unique", true], ["_callEH", true]];
 
     [_NIL(_namespace), _NIL(_varname), _NIL(_element), _unique, _callEH, true, true] call FUNC(pushBackNet);
 };
 
-FUNC(hashSetGlobal) = {
+CFUNC(hashSetGlobal) = {
     params["_namespace", "_varname", "_key", "_value", ["_callEH", true]];
 
     [_NIL(_namespace), _NIL(_varname), _NIL(_key), _NIL(_value), _callEH, true, true] call FUNC(hashSetNet);
 };
 
-FUNC(removeFromArrayGlobal) = {
+CFUNC(removeFromArrayGlobal) = {
     params["_namespace", "_varname", "_elements", ["_pop", false], ["_callEH", true]];
 
     [_NIL(_namespace), _NIL(_varname), _NIL(_elements), _pop, _callEH, true, true] call FUNC(removeFromArrayNet);
 };
 
-FUNC(deleteAtGlobal) = {
+CFUNC(deleteAtGlobal) = {
     params["_namespace", "_varname", "_key", ["_callEH", true]];
 
     [_NIL(_namespace), _NIL(_varname), _NIL(_key), _callEH, true, true] call FUNC(deleteAtNet);
 };
 
-FUNC(publicVariableServer) = {
+CFUNC(publicVariableServer) = {
     params["_namespace", "_varname", ["_callEH", true]];
 
     [_NIL(_namespace), _NIL(_varname), _callEH, 2, false] call FUNC(publicVariable);

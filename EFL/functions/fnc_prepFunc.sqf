@@ -2,6 +2,13 @@
 #define FOLDER_PATH(path) _path = STR(path);
 #define PREP(name) [STR(name), _path] call _compileFunc;
 
+#define COMPILE_C compile
+#ifdef FINAL
+#define COMPILE_C compileFinal
+#endif
+
+private _cFuncs = [];
+
 private _compileFunc = {
 	params["_name", ["_folderPath", ""]];
 
@@ -9,18 +16,23 @@ private _compileFunc = {
 		_folderPath = _folderPath + "\";
 	};
 	private _funcName = SFUNC_NAME(_name);
+
+#ifdef FINAL
+	private _cached = uiNamespace getVariable _funcName;
+	if !(isNil "_cached") exitWith {
+		missionNamespace setVariable [_funcName, _cached];
+	};
+#endif
+
 	private _funcPath = format["%1\%2fn_%3.sqf", STR(ADDON_PATH), _folderPath, _name];
 	private _scriptStr = preprocessFileLineNumbers _funcPath;
 	private _funcStr = format["private _fnc_scriptNameParent = if (isNil '_fnc_scriptName') then {'%1'} else {_fnc_scriptName};
 	private _fnc_scriptName = '%1';
 	scriptName _fnc_scriptName; %2", _funcName, _scriptStr];
+	private _compiled = COMPILE_C _funcStr;
 
-#ifdef FINAL
-	missionNamespace setVariable [_funcName, compileFinal _funcStr];
-#endif
-#ifndef FINAL
-	missionNamespace setVariable [_funcName, compile _funcStr];
-#endif
+	missionNamespace setVariable [_funcName, _compiled];
+	uiNamespace setVariable [_funcName, _compiled];
 };
 
 #ifdef DEV

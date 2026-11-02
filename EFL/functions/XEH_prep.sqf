@@ -4,3 +4,6 @@
 private _path = "";
 
 #include "PREP.hpp"
+#include "fn_compile.sqf"
+
+#include "COMPILE_FINAL.sqf"

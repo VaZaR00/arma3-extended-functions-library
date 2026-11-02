@@ -25,6 +25,9 @@
 #define VAR_PREFIX (if (isNil "_ADDON_PREFX") then {SPREFX} else {_ADDON_PREFX})
 
 
+#define CFUNC(f) _cFuncs pushBack [STR(DOUBLE(_,f)), STR(FUNC(f))]; private DOUBLE(_,f)
+
+
 #define FN_FUNC_CFG(name) class name {file = FUNC_PATH(TRIPLE(fn_,name,.sqf));DO_FUNC_RECOMPILE};
 #define FN_FUNC_CFG_PRE(name) class name {file = FUNC_PATH(TRIPLE(fn_,name,.sqf));preInit = 1;DO_FUNC_RECOMPILE};
 #define FN_FUNC_CFG_POST(name) class name {file = FUNC_PATH(TRIPLE(fn_,name,.sqf));postInit = 1;DO_FUNC_RECOMPILE};
