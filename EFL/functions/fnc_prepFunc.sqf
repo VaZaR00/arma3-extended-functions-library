@@ -37,4 +37,5 @@ private _compileFunc = {
 
 #ifdef DEV
 FUNC(compileFunc) = _compileFunc;
+PREP(compile);
 #endif
