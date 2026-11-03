@@ -2,7 +2,7 @@
 #define FOLDER_PATH(path) _path = STR(path);
 #define PREP(name) [STR(name), _path] call _compileFunc;
 
-#define COMPILE_C
+#define COMPILE_C compile
 #ifdef FINAL
 #define COMPILE_C compileFinal
 #endif

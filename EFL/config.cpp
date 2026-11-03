@@ -5,7 +5,7 @@ class CfgPatches {
 		name = "Extended Functions Library";
 		author = "Vazar";
 		requiredAddons[] = {
-			// "cba_common",
+			"cba_common",
 			"A3_Functions_F"
 		};
 		units[] = {};
