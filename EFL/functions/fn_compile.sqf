@@ -130,7 +130,8 @@ CFUNC(deleteAt) = {
 
     VALID_NAMESPACE
 
-    private _map = _namespace getVariable [_varname, []];
+    private _map = _namespace getVariable _varname;
+    if (isNil "_map") exitWith {};
     _map deleteAt _key;
     _namespace setVariable [_varname, _map];
     [_varname, _callEH] call FUNC(callVariableEH);
