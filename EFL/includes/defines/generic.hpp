@@ -9,6 +9,7 @@
 #define FUNC_PRE_START preStart = 1;
 #define FUNC_PATH_JOIN(path) ADDON_PATH\##path
 #define FUNC_PATH(path) STR(FUNC_PATH_JOIN(path))
+#define CALL_FUNC_XEH(f) STR(call compileScript ['FUNC_PATH_JOIN(f)'])
 #define PREF_ PREFX##_
 #define SPREF_ STR(PREF_)
 #define PREF_FNC PREFX##_fnc_
