@@ -56,7 +56,7 @@
 #define IS_HASH(h) (h isEqualType createHashMap)
 #define IS_INT(s) (s isEqualType 0)
 #define _NIL(var) (if !(isNil STR(var)) then {var})
-#define _NIL1(var) (if !(isNil 'var') then {var})
+#define _NIL1(var) (if !(isNil {var}) then {var})
 #define NIL_DEF _NIL(_def)
 #define MGVAR missionNamespace getVariable
 #define MSVAR missionNamespace setVariable
